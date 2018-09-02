@@ -59,7 +59,7 @@ function clean(appName, option) {
     mdfind(appName, excludeDirs)
         //.pipe( tap( print ) )
         .pipe(operators_1.toArray(), operators_1.switchMap(choice))
-        .subscribe(function (value) { return console.log("ARRAY:", value); }, function (err) { return console.error(err); });
+        .subscribe(function (value) { return console.log(value); }, function (err) { return console.error(err); });
 }
 program
     .version(_package.version, '-v --version')

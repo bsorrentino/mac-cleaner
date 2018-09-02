@@ -112,7 +112,7 @@ function clean( appName:string, option:any ) {
     //.pipe( tap( print ) )
     .pipe( toArray(), switchMap( choice ) )
     .subscribe( 
-        value => console.log( "ARRAY:", value ),
+        value => console.log( value ),
         err => console.error( err)
     );
 
