@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var inquirer = require("inquirer");
 var chalk_1 = __importDefault(require("chalk"));
 var program = require("commander");
 var child_process_1 = require("child_process");
@@ -23,12 +24,28 @@ function mdfind(name, excludeDirs) {
         .pipe(operators_1.tap(function (value) { return console.log("closed", value[0]); }));
     var rx_stat = rxjs_1.bindNodeCallback(fs_1.stat);
     return rxjs_1.fromEvent(mdfind.stdout, "data")
-        .pipe(operators_1.takeUntil(onError), operators_1.buffer(onClose))
-        .pipe(operators_1.mergeMap(function (value) { return rxjs_1.from(value.toString().split('\n').sort()); }))
-        .pipe(operators_1.filter(function (p) { return !excludeDirs.some(function (pp) { return p.match(pp) != null; }); }))
-        .pipe(operators_1.mergeMap(function (p) { return rx_stat(p)
-        .pipe(operators_1.map(function (s) { return FileInfo(p, s); }))
-        .pipe(operators_1.catchError(function (err) { return rxjs_1.of(FileInfo(p)); })); }));
+        .pipe(operators_1.takeUntil(onError), operators_1.takeUntil(onClose), operators_1.buffer(onClose), operators_1.switchMap(function (value) { return rxjs_1.from(value.toString().split('\n').sort()); }), operators_1.filter(function (p) { return !excludeDirs.some(function (pp) { return p.match(pp) != null; }); }), operators_1.mergeMap(function (p) { return rx_stat(p)
+        .pipe(operators_1.map(function (s) { return FileInfo(p, s); }), operators_1.catchError(function (err) { return rxjs_1.of(FileInfo(p)); })); }));
+}
+function print(value) {
+    if (!value.stats) {
+        console.log(chalk_1.default.red(value.path));
+    }
+    else if (value.stats.isFile())
+        console.log(chalk_1.default.blueBright(value.path));
+    else if (value.stats.isDirectory())
+        console.log(chalk_1.default.cyanBright(value.path));
+}
+function choice(fileInfo) {
+    var module = inquirer.createPromptModule();
+    var choices = fileInfo
+        .filter(function (f) { return f.stats && (f.stats.isFile() || f.stats.isDirectory()); })
+        .map(function (f) { return { name: f.path }; });
+    return rxjs_1.from(module({
+        name: "elements",
+        type: "checkbox",
+        choices: choices
+    }));
 }
 function clean(appName, option) {
     console.log(appName);
@@ -40,15 +57,9 @@ function clean(appName, option) {
             .map(function (p) { return new RegExp('^' + p); });
     }
     mdfind(appName, excludeDirs)
-        .subscribe(function (value) {
-        if (!value.stats) {
-            console.log(chalk_1.default.red(value.path));
-        }
-        else if (value.stats.isFile())
-            console.log(chalk_1.default.blueBright(value.path));
-        else if (value.stats.isDirectory())
-            console.log(chalk_1.default.cyanBright(value.path));
-    });
+        //.pipe( tap( print ) )
+        .pipe(operators_1.toArray(), operators_1.switchMap(choice))
+        .subscribe(function (value) { return console.log("ARRAY:", value); }, function (err) { return console.error(err); });
 }
 program
     .version(_package.version, '-v --version')

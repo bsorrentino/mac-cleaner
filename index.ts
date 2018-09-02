@@ -26,8 +26,10 @@ import {
     map, 
     filter,
     mergeMap, 
+    switchMap,
     tap,
-    catchError
+    catchError,
+    toArray
 } from 'rxjs/operators';
 
 let _package = require('./package.json');
@@ -51,15 +53,46 @@ function mdfind( name:string, excludeDirs:Array<RegExp> ):Observable<FileInfo> {
         let rx_stat = bindNodeCallback( stat );
 
         return fromEvent( mdfind.stdout, "data")
-            .pipe( takeUntil( onError ), buffer( onClose ) )
-            .pipe( mergeMap( value => from( value.toString().split('\n').sort() )) )
-            .pipe( filter( p =>  !excludeDirs.some( pp => p.match( pp )!=null)))
-            .pipe( mergeMap( p => rx_stat( p )
-                .pipe( map( s => FileInfo(p,s) ) )
-                .pipe( catchError( err => of( FileInfo(p) )) )       
-            ));
-
+            .pipe(  takeUntil( onError ), 
+                    takeUntil( onClose ),
+                    buffer( onClose ),
+                    switchMap( value => from( value.toString().split('\n').sort() )),
+                    filter( p =>  !excludeDirs.some( pp => p.match( pp )!=null)), 
+                    mergeMap( p => rx_stat( p )
+                        .pipe(  map( s => FileInfo(p,s) ), 
+                                catchError( err => of( FileInfo(p) )) )       
+                    )   
+                );
+ 
 }
+
+function print( value:FileInfo ) {
+
+    if( !value.stats ) {
+        console.log( chalk.red( value.path ))
+    }
+    else if( value.stats.isFile() )
+        console.log( chalk.blueBright( value.path ))  
+    else if( value.stats.isDirectory() )
+        console.log( chalk.cyanBright( value.path ))  
+        
+}
+
+function choice( fileInfo:FileInfo[] ):Observable<any>{
+
+    let module = inquirer.createPromptModule( );
+
+    let choices = fileInfo
+            .filter( f => f.stats && (f.stats.isFile() || f.stats.isDirectory()) )
+            .map( f => { return { name: f.path } } );
+
+    return from( module( { 
+        name:"elements",
+        type: "checkbox",
+        choices: choices
+    })) 
+}
+
 function clean( appName:string, option:any ) {
 
     console.log( appName );
@@ -76,17 +109,12 @@ function clean( appName:string, option:any ) {
     }
 
     mdfind( appName, excludeDirs)
-    .subscribe( value => {
-            
-            if( !value.stats ) {
-                console.log( chalk.red( value.path ))
-            }
-            else if( value.stats.isFile() )
-                console.log( chalk.blueBright( value.path ))  
-            else if( value.stats.isDirectory() )
-                console.log( chalk.cyanBright( value.path ))  
-            
-        });
+    //.pipe( tap( print ) )
+    .pipe( toArray(), switchMap( choice ) )
+    .subscribe( 
+        value => console.log( "ARRAY:", value ),
+        err => console.error( err)
+    );
 
 }
 
