@@ -2,8 +2,8 @@
 import inquirer = require('inquirer');
 import chalk from 'chalk';
 import program = require('commander');
-import { spawn } from 'child_process';
-import { stat, Stats } from 'fs';
+import { spawn, exec } from 'child_process';
+import { stat, Stats, rmdir, unlink } from 'fs';
 import path from 'path';
 
 let untildify:(( path:string ) => string) = require('untildify');
@@ -16,7 +16,8 @@ import {
     Observable, 
     Observer, 
     throwError, 
-    bindNodeCallback, 
+    bindNodeCallback,
+    empty, 
 } from 'rxjs';
 
 import { 
@@ -36,6 +37,13 @@ let _package = require('./package.json');
 
 type FileInfo = { path:string, stats?:Stats };
 
+
+const rx_unlink = bindNodeCallback( unlink );
+const rx_rmdir = bindNodeCallback( rmdir );
+const rx_stat = bindNodeCallback( stat );
+const rx_exec = bindNodeCallback( exec ); 
+
+
 function FileInfo( path:string, stats?:Stats ) {
     return { path:path, stats:stats };
 }
@@ -49,8 +57,6 @@ function mdfind( name:string, excludeDirs:Array<RegExp> ):Observable<FileInfo> {
             .pipe( mergeMap( err => throwError(err )));
         let onClose = fromEvent( mdfind, "close")
             .pipe( tap( (value:any) => console.log( "closed", value[0] ) ));
-
-        let rx_stat = bindNodeCallback( stat );
 
         return fromEvent( mdfind.stdout, "data")
             .pipe(  takeUntil( onError ), 
@@ -84,7 +90,7 @@ function choice( fileInfo:FileInfo[] ):Observable<any>{
 
     let choices = fileInfo
             .filter( f => f.stats && (f.stats.isFile() || f.stats.isDirectory()) )
-            .map( f => { return { name: f.path } } );
+            .map( f => { return { name: f.path, value: f } } );
 
     return from( module( { 
         name:"elements",
@@ -93,6 +99,19 @@ function choice( fileInfo:FileInfo[] ):Observable<any>{
     })) 
 }
 
+
+
+function remove( value:FileInfo ):Observable<FileInfo> {
+    if( value.stats ) {
+        if( value.stats.isFile() )
+            return rx_unlink( value.path ).pipe( map( v => value ));
+        else if( value.stats.isDirectory() )
+            return rx_exec( 'rm -r ' + value.path ).pipe( map( v => value ));  
+
+    } 
+    return empty();
+
+}
 function clean( appName:string, option:any ) {
 
     console.log( appName );
@@ -111,8 +130,10 @@ function clean( appName:string, option:any ) {
     mdfind( appName, excludeDirs)
     //.pipe( tap( print ) )
     .pipe( toArray(), switchMap( choice ) )
+    .pipe( mergeMap( v => from(v.elements) ))
+    .pipe( mergeMap( remove ) )
     .subscribe( 
-        value => console.log( value ),
+        v => console.log( "'%s' removed!", v.path),
         err => console.error( err)
     );
 

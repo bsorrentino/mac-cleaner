@@ -12,6 +12,10 @@ var untildify = require('untildify');
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
 var _package = require('./package.json');
+var rx_unlink = rxjs_1.bindNodeCallback(fs_1.unlink);
+var rx_rmdir = rxjs_1.bindNodeCallback(fs_1.rmdir);
+var rx_stat = rxjs_1.bindNodeCallback(fs_1.stat);
+var rx_exec = rxjs_1.bindNodeCallback(child_process_1.exec);
 function FileInfo(path, stats) {
     return { path: path, stats: stats };
 }
@@ -22,7 +26,6 @@ function mdfind(name, excludeDirs) {
         .pipe(operators_1.mergeMap(function (err) { return rxjs_1.throwError(err); }));
     var onClose = rxjs_1.fromEvent(mdfind, "close")
         .pipe(operators_1.tap(function (value) { return console.log("closed", value[0]); }));
-    var rx_stat = rxjs_1.bindNodeCallback(fs_1.stat);
     return rxjs_1.fromEvent(mdfind.stdout, "data")
         .pipe(operators_1.takeUntil(onError), operators_1.takeUntil(onClose), operators_1.buffer(onClose), operators_1.switchMap(function (value) { return rxjs_1.from(value.toString().split('\n').sort()); }), operators_1.filter(function (p) { return !excludeDirs.some(function (pp) { return p.match(pp) != null; }); }), operators_1.mergeMap(function (p) { return rx_stat(p)
         .pipe(operators_1.map(function (s) { return FileInfo(p, s); }), operators_1.catchError(function (err) { return rxjs_1.of(FileInfo(p)); })); }));
@@ -40,12 +43,21 @@ function choice(fileInfo) {
     var module = inquirer.createPromptModule();
     var choices = fileInfo
         .filter(function (f) { return f.stats && (f.stats.isFile() || f.stats.isDirectory()); })
-        .map(function (f) { return { name: f.path }; });
+        .map(function (f) { return { name: f.path, value: f }; });
     return rxjs_1.from(module({
         name: "elements",
         type: "checkbox",
         choices: choices
     }));
+}
+function remove(value) {
+    if (value.stats) {
+        if (value.stats.isFile())
+            return rx_unlink(value.path).pipe(operators_1.map(function (v) { return value; }));
+        else if (value.stats.isDirectory())
+            return rx_exec('rm -r ' + value.path).pipe(operators_1.map(function (v) { return value; }));
+    }
+    return rxjs_1.empty();
 }
 function clean(appName, option) {
     console.log(appName);
@@ -59,7 +71,9 @@ function clean(appName, option) {
     mdfind(appName, excludeDirs)
         //.pipe( tap( print ) )
         .pipe(operators_1.toArray(), operators_1.switchMap(choice))
-        .subscribe(function (value) { return console.log(value); }, function (err) { return console.error(err); });
+        .pipe(operators_1.mergeMap(function (v) { return rxjs_1.from(v.elements); }))
+        .pipe(operators_1.mergeMap(remove))
+        .subscribe(function (v) { return console.log("'%s' removed!", v.path); }, function (err) { return console.error(err); });
 }
 program
     .version(_package.version, '-v --version')
