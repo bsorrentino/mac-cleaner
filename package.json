@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",
@@ -15,6 +15,7 @@
     "untildify": "^3.0.3"
   },
   "devDependencies": {
-    "@types/inquirer": "0.0.43"
+    "@types/inquirer": "0.0.43",
+    "typescript": "^3.1.6"
   }
 }

@@ -5,13 +5,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var inquirer = require("inquirer");
 var chalk_1 = __importDefault(require("chalk"));
-var program = require("commander");
 var child_process_1 = require("child_process");
 var fs_1 = require("fs");
-var untildify = require('untildify');
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
+var program = require("commander");
+var untildify = require('untildify');
 var _package = require('./package.json');
+var sortFileInfo = function (a, b) {
+    if (a.path < b.path)
+        return -1;
+    if (a.path > b.path)
+        return 1;
+    return 0;
+};
 var rx_unlink = rxjs_1.bindNodeCallback(fs_1.unlink);
 var rx_rmdir = rxjs_1.bindNodeCallback(fs_1.rmdir);
 var rx_stat = rxjs_1.bindNodeCallback(fs_1.stat);
@@ -55,7 +62,7 @@ function remove(value) {
         if (value.stats.isFile())
             return rx_unlink(value.path).pipe(operators_1.map(function (v) { return value; }));
         else if (value.stats.isDirectory())
-            return rx_exec('rm -r ' + value.path).pipe(operators_1.map(function (v) { return value; }));
+            return rx_exec("rm -r  '" + value.path + "'").pipe(operators_1.map(function (v) { return value; }));
     }
     return rxjs_1.empty();
 }
@@ -70,7 +77,7 @@ function clean(appName, option) {
     }
     mdfind(appName, excludeDirs)
         //.pipe( tap( print ) )
-        .pipe(operators_1.toArray(), operators_1.switchMap(choice))
+        .pipe(operators_1.toArray(), operators_1.map(function (files) { return files.sort(sortFileInfo); }), operators_1.switchMap(choice))
         .pipe(operators_1.mergeMap(function (v) { return rxjs_1.from(v.elements); }))
         .pipe(operators_1.mergeMap(remove))
         .subscribe(function (v) { return console.log("'%s' removed!", v.path); }, function (err) { return console.error(err); });
@@ -81,3 +88,6 @@ program
     .arguments('<app name>')
     .action(clean)
     .parse(process.argv);
+if (!process.argv.slice(2).length) {
+    program.outputHelp();
+}

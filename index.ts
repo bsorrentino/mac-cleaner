@@ -1,42 +1,24 @@
 
 import inquirer = require('inquirer');
 import chalk from 'chalk';
+import { exec, spawn } from 'child_process';
+import { rmdir, stat, Stats, unlink } from 'fs';
+import { bindNodeCallback, empty, from, fromEvent, Observable, of, throwError } from 'rxjs';
+import { buffer, catchError, filter, map, mergeMap, switchMap, takeUntil, tap, toArray } from 'rxjs/operators';
+
 import program = require('commander');
-import { spawn, exec } from 'child_process';
-import { stat, Stats, rmdir, unlink } from 'fs';
-import path from 'path';
 
 let untildify:(( path:string ) => string) = require('untildify');
-
-import { 
-    concat,
-    from,
-    of,
-    fromEvent, 
-    Observable, 
-    Observer, 
-    throwError, 
-    bindNodeCallback,
-    empty, 
-} from 'rxjs';
-
-import { 
-    buffer,
-    take,
-    takeUntil, 
-    map, 
-    filter,
-    mergeMap, 
-    switchMap,
-    tap,
-    catchError,
-    toArray
-} from 'rxjs/operators';
 
 let _package = require('./package.json');
 
 type FileInfo = { path:string, stats?:Stats };
 
+const sortFileInfo = ( a:FileInfo, b:FileInfo ) => {
+    if( a.path < b.path ) return -1;
+    if( a.path > b.path ) return 1;
+    return 0;
+}
 
 const rx_unlink = bindNodeCallback( unlink );
 const rx_rmdir = bindNodeCallback( rmdir );
@@ -106,7 +88,7 @@ function remove( value:FileInfo ):Observable<FileInfo> {
         if( value.stats.isFile() )
             return rx_unlink( value.path ).pipe( map( v => value ));
         else if( value.stats.isDirectory() )
-            return rx_exec( 'rm -r ' + value.path ).pipe( map( v => value ));  
+            return rx_exec( `rm -r  '${value.path}'` ).pipe( map( v => value ));  
 
     } 
     return empty();
@@ -129,7 +111,7 @@ function clean( appName:string, option:any ) {
 
     mdfind( appName, excludeDirs)
     //.pipe( tap( print ) )
-    .pipe( toArray(), switchMap( choice ) )
+    .pipe( toArray(), map( files => files.sort( sortFileInfo ) ), switchMap( choice ) )
     .pipe( mergeMap( v => from(v.elements) ))
     .pipe( mergeMap( remove ) )
     .subscribe( 
@@ -146,3 +128,6 @@ program
     .action( clean )
     .parse( process.argv);
 
+if (!process.argv.slice(2).length) {
+        program.outputHelp();
+}
