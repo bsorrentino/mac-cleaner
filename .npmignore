@@ -2,6 +2,7 @@
 
 #typescript
 *.ts
+tsconfig.json
 
 #tests
 test
