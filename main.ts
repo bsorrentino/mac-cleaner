@@ -23,7 +23,7 @@ const sortFileInfo = ( a:FileInfo, b:FileInfo ) => {
 const rx_unlink = bindNodeCallback( unlink );
 const rx_rmdir = bindNodeCallback( rmdir );
 const rx_stat = bindNodeCallback( stat );
-const rx_exec = bindNodeCallback( exec ); 
+const rx_exec = bindNodeCallback( exec );
 
 
 function FileInfo( path:string, stats?:Stats ) {
@@ -41,17 +41,17 @@ function mdfind( name:string, excludeDirs:Array<RegExp> ):Observable<FileInfo> {
             //.pipe( tap( (value:any) => console.log( "closed", value[0] ) ));
 
         return fromEvent( mdfind.stdout, "data")
-            .pipe(  takeUntil( onError ), 
+            .pipe(  takeUntil( onError ),
                     takeUntil( onClose ),
                     buffer( onClose ),
                     switchMap( value => from( value.toString().split('\n').sort() )),
-                    filter( p =>  !excludeDirs.some( pp => p.match( pp )!=null)), 
+                    filter( p =>  !excludeDirs.some( pp => p.match( pp )!=null)),
                     mergeMap( p => rx_stat( p )
-                        .pipe(  map( s => FileInfo(p,s) ), 
-                                catchError( err => of( FileInfo(p) )) )       
-                    )   
+                        .pipe(  map( s => FileInfo(p,s) ),
+                                catchError( err => of( FileInfo(p) )) )
+                    )
                 );
- 
+
 }
 
 function print( value:FileInfo ) {
@@ -60,10 +60,10 @@ function print( value:FileInfo ) {
         console.log( chalk.red( value.path ))
     }
     else if( value.stats.isFile() )
-        console.log( chalk.blueBright( value.path ))  
+        console.log( chalk.blueBright( value.path ))
     else if( value.stats.isDirectory() )
-        console.log( chalk.cyanBright( value.path ))  
-        
+        console.log( chalk.cyanBright( value.path ))
+
 }
 
 function choice( fileInfo:FileInfo[], pageSize:number ):Observable<any>{
@@ -74,12 +74,12 @@ function choice( fileInfo:FileInfo[], pageSize:number ):Observable<any>{
             .filter( f => f.stats && (f.stats.isFile() || f.stats.isDirectory()) )
             .map( f => { return { name: f.path, value: f } } );
 
-    return from( module( [{ 
+    return from( module( [{
         name:"elements",
         type: "checkbox",
         choices: choices,
         pageSize: pageSize
-    }])) 
+    }]))
 }
 
 
@@ -94,17 +94,17 @@ function remove( value:FileInfo, dryRun = false ):Observable<FileInfo> {
         else if( value.stats.isDirectory() ) {
             console.log( `rm -r  '${value.path}'`);
             if( dryRun ) return empty();
-            return rx_exec( `rm -r  '${value.path}'` ).pipe( map( v => value ));      
+            return rx_exec( `rm -r  '${value.path}'` ).pipe( map( v => value ));
         }
 
-    } 
+    }
     return empty();
 
 }
 function clean( appName:string, option:any ) {
-    
+
     process.stdout.write('\x1Bc');
-    
+
     console.log( appName );
 
     //console.log( 'clean ', appName, path.resolve( String(option.excludeDir) ) );
@@ -119,20 +119,20 @@ function clean( appName:string, option:any ) {
     }
 
     const msg = () => {
-        if( option.dryRun ) 
+        if( option.dryRun )
             console.log( "#\n# These files should be removed\n#");
-        else 
+        else
             console.log( "#\n# These files have been removed\n#");
     }
 
     mdfind( appName, excludeDirs)
-    .pipe( toArray(), 
-        map( files => files.sort( sortFileInfo ) ), 
+    .pipe( toArray(),
+        map( files => files.sort( sortFileInfo ) ),
         switchMap( files => choice(files, Number(option.pageSize)) ) )
     .pipe( tap( msg ) )
     .pipe( mergeMap( v => from(v.elements) ))
     .pipe( mergeMap( f => remove(f, option.dryRun ) ) )
-    .subscribe( 
+    .subscribe(
         v => {},
         err => console.error( err),
         () => console.log('\n')
@@ -140,15 +140,18 @@ function clean( appName:string, option:any ) {
 
 }
 
-program
-    .version(_package.version, '-v --version')
-    .option( "--excludeDir <dir[,dir,...]>", "exclude folder list")
-    .option( "--dryRun", "simulate execution (file will non be deleted)")
-    .option( "--pageSize <n>", "number of lines that will be shown per page", 10)
-    .arguments( '<app name>' )
-    .action( clean )
-    .parse( process.argv);
+export function main() {
+  program
+      .version(_package.version, '-v --version')
+      .option( "--excludeDir <dir[,dir,...]>", "exclude folder list")
+      .option( "--dryRun", "simulate execution (file will non be deleted)")
+      .option( "--pageSize <n>", "number of lines that will be shown per page", 10)
+      .arguments( '<app name>' )
+      .action( clean )
+      .parse( process.argv);
 
-if (!process.argv.slice(2).length) {
-        program.outputHelp();
+  if (!process.argv.slice(2).length) {
+          program.outputHelp();
+  }
+
 }

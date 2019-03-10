@@ -1,12 +1,18 @@
 {
-  "name": "macosx-cleaner",
+  "name": "mac-cleaner",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
-  "keywords": [],
+  "bin": {
+    "mac-cleaner": "./index.js"
+  },
+  "keywords": [
+    "macosx",
+    "mdfind"
+  ],
   "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",
   "license": "ISC",
   "dependencies": {
