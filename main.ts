@@ -146,7 +146,7 @@ export function main() {
       .option( "--excludeDir <dir[,dir,...]>", "exclude folder list")
       .option( "--dryRun", "simulate execution (file will non be deleted)")
       .option( "--pageSize <n>", "number of lines that will be shown per page", 10)
-      .arguments( '<app name>' )
+      .arguments( '<name>' )
       .action( clean )
       .parse( process.argv);
 
