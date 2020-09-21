@@ -3,6 +3,16 @@ A simple macosx utility to completely remove apps &amp; software
 
 Inspired by [Manual App & Component Removal in OS X via Terminal](http://osxdaily.com/2014/07/31/manual-complete-app-removal-mac-os-x-terminal/#condensed)
 
+## Install
+
+```
+# configure a scoped npm registry 
+$ npm config set @bsorrentino:registry https://npm.pkg.github.com
+```
+
+```
+$ npm install @bsorrentino/mac-cleaner -g
+```
 
 ## Usage
 
