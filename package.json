@@ -18,8 +18,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bsorrentino/RxMonitor.git",
-    "directory": "packages/rxmarble-lib"
+    "url": "https://github.com/bsorrentino/mac-cleaner.git"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
