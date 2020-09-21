@@ -1,6 +1,6 @@
 {
   "name": "mac-cleaner",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -15,7 +15,15 @@
     "mdfind"
   ],
   "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",
-  "license": "ISC",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bsorrentino/RxMonitor.git",
+    "directory": "packages/rxmarble-lib"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "dependencies": {
     "commander": "^6.1.0",
     "inquirer": "^7.3.3",
