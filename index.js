@@ -1,4 +1,5 @@
 #!/usr/bin/env node
 
-var _main = require("./main");
-_main.main();
+const  { main } = require('./dist/main')
+
+main();
