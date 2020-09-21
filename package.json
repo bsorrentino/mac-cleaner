@@ -1,14 +1,14 @@
 {
-  "name": "mac-cleaner",
-  "version": "1.1.0",
+  "name": "@bsorrentino/mac-cleaner",
+  "version": "1.3.3",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "build": "parcel build index.ts -t node",
+    "build": "parcel build main.ts -t node",
     "start": "node index.js"
   },
   "bin": {
-    "mac-cleaner": "./dist/index.js"
+    "mac-cleaner": "./index.js"
   },
   "keywords": [
     "macosx",
@@ -18,7 +18,8 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bsorrentino/mac-cleaner.git"
+    "url": "https://github.com/bsorrentino/mac-cleaner.git",
+    "directory":"."
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
