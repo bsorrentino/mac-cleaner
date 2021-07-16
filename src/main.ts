@@ -10,8 +10,6 @@ import program from 'commander';
 
 let untildify:(( path:string ) => string) = require('untildify');
 
-let _package = require('./package.json');
-
 type FileInfo = { path:string, stats?:Stats };
 
 const sortFileInfo = ( a:FileInfo, b:FileInfo ) => {
@@ -140,13 +138,15 @@ function clean( appName:string, option:any ) {
 
 }
 
-export function main() {
+export function main( version?:string ) {
 
     const p = program
-            .version(_package.version, '-v --version')
+            .version( version ?? 'unknown', '-v --version')
             .option( '--excludeDir <dir[,dir,...]>', 'exclude folder list')
             .option( '--dryRun', 'simulate execution (file will non be deleted)')
             .option( '--pageSize <n>', 'number of lines that will be shown per page', '10')
+            .option( '--of --only-file', "only match against file")
+            .option( '--ex --exact', "match exactly the name")
             .arguments( '<name>' )
             .action( clean )
 
