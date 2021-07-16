@@ -207,7 +207,7 @@ export function main( version?:string ) {
     const p = program
             .version( version ?? 'unknown', '-v --version')
             .option( '--excludeDir <dir[,dir,...]>', 'exclude folder list')
-            .option( '--onlyin <dir>')
+            .option( '--onlyin <dir>', 'search exclusively in <dir>')
             .option( '--dryRun', 'simulate execution (file will non be deleted)')
             .option( '--pageSize <n>', 'number of lines that will be shown per page', '10')
             .option( '--exact', 'match exactly the given name', false)
