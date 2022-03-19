@@ -1,8 +1,22 @@
 {
   "name": "@bsorrentino/mac-cleaner",
   "version": "1.4.1",
-  "description": "",
+  "description": "A simple macosx utility to completely remove apps & software",
   "main": "index.js",
+  "homepage": "https://github.com/bsorrentino/mac-cleaner",
+  "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bsorrentino/mac-cleaner.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bsorrentino/mac-cleaner.git",
+    "email": "bartolomeo.sorrentino@gmail.com"
+  }, 
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc --project .",
     "start": "node index.js"
@@ -14,13 +28,6 @@
     "macosx",
     "mdfind"
   ],
-  "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/bsorrentino/mac-cleaner.git",
-    "directory": "."
-  },
   "dependencies": {
     "chalk": "^4.1.1",
     "commander": "^6.2.1",
