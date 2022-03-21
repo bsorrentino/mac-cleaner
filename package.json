@@ -1,6 +1,6 @@
 {
   "name": "@bsorrentino/mac-cleaner",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "A simple macosx utility to completely remove apps & software",
   "main": "index.js",
   "homepage": "https://github.com/bsorrentino/mac-cleaner",
@@ -13,7 +13,7 @@
   "bugs": {
     "url": "https://github.com/bsorrentino/mac-cleaner.git",
     "email": "bartolomeo.sorrentino@gmail.com"
-  }, 
+  },
   "publishConfig": {
     "access": "public"
   },
