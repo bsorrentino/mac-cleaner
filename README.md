@@ -6,11 +6,6 @@ Inspired by [Manual App & Component Removal in OS X via Terminal](http://osxdail
 ## Install
 
 ```
-# configure a scoped npm registry 
-$ npm config set @bsorrentino:registry https://npm.pkg.github.com
-```
-
-```
 $ npm install @bsorrentino/mac-cleaner -g
 ```
 
