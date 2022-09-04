@@ -2,8 +2,8 @@
 import 'zx/globals'
 import inquirer, { Answers } from 'inquirer';
 import { Stats } from 'fs';
-import { EMPTY, from, Observable } from 'rxjs';
-import { map, mergeMap } from 'rxjs/operators/index.js';
+import { EMPTY, from, Observable, map, mergeMap } from 'rxjs';
+
 import {basename} from 'path'
 import { Command } from 'commander';
 import untildify from 'untildify'
