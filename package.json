@@ -1,6 +1,6 @@
 {
   "name": "@bsorrentino/mac-cleaner",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A simple macosx utility to completely remove apps & software",
   "main": "index.mjs",
   "homepage": "https://github.com/bsorrentino/mac-cleaner",
