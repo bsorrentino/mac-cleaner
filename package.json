@@ -1,8 +1,8 @@
 {
   "name": "@bsorrentino/mac-cleaner",
-  "version": "1.4.2",
+  "version": "2.0.0",
   "description": "A simple macosx utility to completely remove apps & software",
-  "main": "index.js",
+  "main": "index.mjs",
   "homepage": "https://github.com/bsorrentino/mac-cleaner",
   "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",
   "license": "MIT",
@@ -20,7 +20,8 @@
   },
   "scripts": {
     "build": "tsc --project .",
-    "start": "node index.js"
+    "start": "node index.js",
+    "changelog": "git-changelog-command-line -of CHANGELOG.md"
   },
   "bin": {
     "mac-cleaner": "./index.js"
@@ -37,63 +38,9 @@
   },
   "devDependencies": {
     "@types/inquirer": "^9.0.1",
-    "cz-conventional-changelog": "^3.3.0",
     "typescript": "^4.8.2"
   },
   "engines": {
-    "node": ">=12"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
-  },
-  "standard-version": {
-    "skip": {
-      "changelog": false,
-      "bump": false,
-      "commit": false,
-      "tag": true
-    },
-    "types": [
-      {
-        "type": "feat",
-        "section": "Features"
-      },
-      {
-        "type": "fix",
-        "section": "Bug Fixes"
-      },
-      {
-        "type": "chore",
-        "hidden": true
-      },
-      {
-        "type": "docs",
-        "section": "Documentation"
-      },
-      {
-        "type": "style",
-        "hidden": true
-      },
-      {
-        "type": "refactor",
-        "section": "Refactoring"
-      },
-      {
-        "type": "perf",
-        "hidden": true
-      },
-      {
-        "type": "test",
-        "hidden": true
-      },
-      {
-        "type": "build",
-        "section": "Build"
-      }
-    ],
-    "commitUrlFormat": "https://github.com/mokkapps/changelog-generator-demo/commits/{{hash}}",
-    "compareUrlFormat": "https://github.com/mokkapps/changelog-generator-demo/compare/{{previousTag}}...{{currentTag}}"
+    "node": ">=16"
   }
 }
