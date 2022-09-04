@@ -6,6 +6,7 @@
   "homepage": "https://github.com/bsorrentino/mac-cleaner",
   "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",
   "license": "MIT",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/bsorrentino/mac-cleaner.git"
