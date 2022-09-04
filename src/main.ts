@@ -210,6 +210,3 @@ async function runSearchAsync( appName:string, options:any ) {
             )
 
 }
-
-
-main( '2.0')
