@@ -1,12 +1,13 @@
 
+import 'zx/globals'
 import inquirer = require('inquirer')
-import chalk from 'chalk';
 import { exec, spawn } from 'child_process';
 import { rmdir, stat, Stats, unlink } from 'fs';
 import { bindNodeCallback, EMPTY, from, fromEvent, Observable, of, throwError } from 'rxjs';
 import { buffer, catchError, filter, map, mergeMap, switchMap, takeUntil, tap, toArray } from 'rxjs/operators';
 import {basename} from 'path'
-import program from 'commander';
+import { Command } from 'commander';
+
 
 let untildify:(( path:string ) => string) = require('untildify')
 
@@ -38,6 +39,43 @@ const sortFileInfo = ( a:FileInfo, b:FileInfo ) => {
 function FileInfo( path:string, stats?:Stats ) {
     return { path:path, stats:stats };
 }
+
+/**
+ * 
+ * @param name 
+ * @param options 
+ */
+async function mdFindAsync( name:string, options:SearchOptions ) {
+    const { excludeDirs, onlyin, exact } = options
+        
+    let params = [ '-name', name ]
+
+    if( onlyin ) {
+        params.push( '-onlyin', onlyin )
+    }
+
+    const { stderr, stdout } = await $`mdfind ${params}`
+
+    const excludeDirFilter =  excludeDirs.length > 0 ? 
+                                  ( line:string ) =>   !excludeDirs.some( pp => line.match( pp )!=null) :
+                                  ( _:string ) => true ;
+    
+    const exactFilter = (exact) ? 
+                            (line:string) => basename(line).localeCompare(name, undefined, { sensitivity: 'accent'} )===0 :
+                            ( _:string ) => true ;
+
+    const toFileInfo = async (line:string ) => { 
+        const stat = await fs.stat( line ) 
+        return FileInfo( line, stat )
+    }
+
+    return  stdout.split('\n')
+            .filter( excludeDirFilter )
+            .filter( exactFilter )
+            .map( toFileInfo )
+         
+}
+
 
 /**
  * 
@@ -83,7 +121,7 @@ function mdfind( name:string, options:SearchOptions ):Observable<FileInfo> {
 
         return result.pipe( 
                     mergeMap( p => rx_stat( p )
-                        .pipe(  map( s => FileInfo(p,s) ),
+                        .pipe(  map( s => FileInfo(p,<any>s) ),
                                 catchError( err => of( FileInfo(p) )) )
                     )
                 )
@@ -203,6 +241,7 @@ function runSearch( appName:string, options:any ) {
  * @param version 
  */
 export function main( version?:string ) {
+    const program = new Command()
 
     const p = program
             .version( version ?? 'unknown', '-v --version')
